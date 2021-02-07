@@ -1,0 +1,163 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "hostingPlanName": {
+            "type": "string",
+            "minLength": 4,
+            "maxLength": 12,
+            "metadata": {
+                "description": "The name of the app service, hosting plan."
+            }
+        },
+        "kind": {
+            "type": "string",
+            "defaultValue": "linux",
+            "allowedValues": [
+                "linux",
+                "app"
+            ],
+            "metadata": {
+                "description": "App Service kind (windows/linux)"
+            }
+        },
+        "sku": {
+            "type": "string",
+            "defaultValue": "D1",
+            "allowedValues": [
+                "B1",
+                "D1",
+                "S1",
+                "P1v2",
+                "P1v3"
+            ],
+            "metadata": {
+                "description": "App Service Tier (SKU)."
+            }
+        },
+        "size": {
+            "type": "int",
+            "defaultValue": 1,
+            "minValue": 1,
+            "maxValue": 4,
+            "metadata": {
+                "description": "App Service VM Size."
+            }
+        },
+        "capacity": {
+            "type": "int",
+            "defaultValue": 1,
+            "minValue": 1,
+            "maxValue": 10,
+            "metadata": {
+                "description": "App Service capacity"
+            }
+        },
+        "tags": {
+            "type": "array",
+            "defaultValue": [ ],
+            "metadata": {
+                "description": "Tags for app service hosting plan"
+            }
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "hostingPlanName": "[parameters('hostingPlanName')]",
+        "sku": "[parameters('sku')]",
+        "workerSize": "[parameters('size')]",
+        "isWindows": "[equals(parameters('kind'), 'app')]",
+        "kind": "[parameters('kind')]",
+        "reserved": "[not(variables('isWindows'))]",
+        "maxCapacity": "[if(equals('S1', parameters('sku')), 10, if(equals('P1v2', parameters('sku')), 20, 3))]",
+        "autoscaleEnable": "[not(equals(parameters('sku'), 'F1'))]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2020-06-01",
+            "name": "[variables('hostingPlanName')]",
+            "kind": "[variables('kind')]",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "[variables('sku')]",
+                "capacity": "[parameters('capacity')]"
+            },
+            "properties": {
+                "name": "[variables('hostingPlanName')]",
+                "workerSize": "[variables('workerSize')]",
+                "reserved": "[variables('reserved')]"
+            },
+            "tags": "[parameters('tags')]"
+        },
+        {
+            "condition": "[variables('autoscaleEnable')]",
+            "type": "microsoft.insights/autoscalesettings",
+            "apiVersion": "2014-04-01",
+            "name": "scale-out",
+            "location": "[variables('location')]",
+            "properties": {
+                "profiles": [
+                    {
+                        "name": "CPU Scale out",
+                        "capacity": {
+                            "minimum": "[parameters('capacity')]",
+                            "maximum": "[variables('maxCapacity')]",
+                            "default": "[parameters('capacity')]"
+                        },
+                        "rules": [
+                            {
+                                "metricTrigger": {
+                                    "metricName": "CpuPercentage",
+                                    "metricNamespace": "microsoft.web/serverfarms",
+                                    "metricResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+                                    "timeGrain": "PT1M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT5M",
+                                    "timeAggregation": "Average",
+                                    "operator": "GreaterThan",
+                                    "threshold": 80,
+                                    "dimensions": [],
+                                    "dividePerInstance": false
+                                },
+                                "scaleAction": {
+                                    "direction": "Increase",
+                                    "type": "ChangeCount",
+                                    "value": 1,
+                                    "cooldown": "PT5M"
+                                }
+                            },
+                            {
+                                "metricTrigger": {
+                                    "metricName": "CpuPercentage",
+                                    "metricNamespace": "microsoft.web/serverfarms",
+                                    "metricResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+                                    "timeGrain": "PT1M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT5M",
+                                    "timeAggregation": "Average",
+                                    "operator": "LessThan",
+                                    "threshold": 65,
+                                    "dimensions": [],
+                                    "dividePerInstance": false
+                                },
+                                "scaleAction": {
+                                    "direction": "Decrease",
+                                    "type": "ChangeCount",
+                                    "value": 1,
+                                    "cooldown": "PT15M"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "enabled": true,
+                "name": "scale-out",
+                "targetResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]"
+            ]
+        }
+    ]
+}

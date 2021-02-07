@@ -1,0 +1,217 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccountName": {
+            "type": "string",
+            "defaultValue": "unknown",
+            "minLength": 3,
+            "maxLength": 45,
+            "metadata": {
+                "description": "The name of the Storage Account."
+            }
+        },
+        "queues": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "The name of the Storage Account queue."
+            }
+        },
+        "tables": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "The name of the Storage Account table."
+            }
+        },
+        "containers": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "The name of the Storage Account container."
+            }
+        },
+        "shares": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "The name of the Storage Account queue."
+            }
+        },
+        "sku": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS",
+                "Standard_GRS",
+                "Standard_RAGRS",
+                "Standard_ZRS",
+                "Premium_LRS",
+                "Premium_ZRS",
+                "Standard_GZRS",
+                "Standard_RAGZRS"
+            ],
+            "metadata": {
+                "description": "Storage Account SKU."
+            }
+        },
+        "tags": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "Tags for app service hosting plan"
+            }
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]",
+        "sku": "[parameters('sku')]",
+        "storageAccountName": "[parameters('storageAccountName')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('storageAccountName')]",
+            "apiVersion": "2020-08-01-preview",
+            "kind": "StorageV2",
+            "location": "[variables('location')]",
+            "sku": {
+                "name": "[variables('sku')]",
+                "tier": "Standard"
+            },
+            "properties": {
+                "minimumTlsVersion": "TLS1_2",
+                "supportsHttpsTrafficOnly": true,
+                "accessTier": "Hot",
+                "encryption": {
+                    "services": {
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "file": {
+                            "enabled": true,
+                            "keyType": "Account"
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            },
+            "tags": "[parameters('tags')]"
+        },
+        {
+            "name": "[concat(variables('storageAccountName'), '/default/', parameters('shares')[copyIndex()].name)]",
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2019-06-01",
+            "properties": {
+                "shareDeleteRetentionPolicy": {
+                    "enabled": true,
+                    "days": 365
+                }
+            },
+            "copy": {
+                "name": "shares-copy",
+                "count": "[length(parameters('shares'))]",
+                "mode": "Serial",
+                "batchSize": 1
+            }
+        },
+        {
+            "name": "[concat(variables('storageAccountName'), '/default')]",
+            "type": "Microsoft.Storage/storageAccounts/queueServices",
+            "apiVersion": "2019-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageAccountName'), '/default/', parameters('queues')[copyIndex()].name)]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/queueServices', variables('storageAccountName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ],
+            "properties": {
+                "metadata": {}
+            },
+            "copy": {
+                "name": "sa_queue-copy",
+                "count": "[length(parameters('queues'))]",
+                "mode": "Serial",
+                "batchSize": 1
+            }
+        },
+        {
+            "name": "[concat(variables('storageAccountName'), '/default')]",
+            "type": "Microsoft.Storage/storageAccounts/tableServices",
+            "apiVersion": "2019-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageAccountName'), '/default/', parameters('tables')[copyIndex()].name)]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('storageAccountName'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ],
+            "properties": {
+                "metadata": {}
+            },
+            "copy": {
+                "name": "sa_table-copy",
+                "count": "[length(parameters('tables'))]",
+                "mode": "Serial",
+                "batchSize": 1
+            }
+        },
+        {
+            "name": "[concat(variables('storageAccountName'), '/default')]",
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2019-06-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "isVersioningEnabled": false,
+                "automaticSnapshotPolicyEnabled": false
+            }
+        },
+        {
+            "name": "[concat(variables('storageAccountName'), '/default/', parameters('containers')[copyIndex()].name)]",
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "properties": {
+                "publicAccess": "None",
+                "metadata": {}
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('storageAccountName'), 'default')]",
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]"
+            ],
+            "copy": {
+                "name": "sa_cotainer-copy",
+                "count": "[length(parameters('containers'))]",
+                "mode": "Serial",
+                "batchSize": 1
+            }
+        }
+    ]
+}
