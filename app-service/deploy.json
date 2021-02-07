@@ -54,10 +54,10 @@
             }
         },
         "tags": {
-            "type": "array",
-            "defaultValue": [ ],
+            "type": "object",
+            "defaultValue": { },
             "metadata": {
-                "description": "Tags for app service hosting plan"
+                "description": "Tags for service"
             }
         }
     },
