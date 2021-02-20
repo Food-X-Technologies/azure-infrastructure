@@ -113,7 +113,7 @@
             "copy": {
                 "name": "shares-copy",
                 "count": "[length(parameters('shares'))]",
-                "mode": "Parallel",
+                "mode": "Serial",
                 "batchSize": "[length(parameters('shares'))]"
             }
         },
@@ -146,7 +146,7 @@
             "copy": {
                 "name": "sa_queue-copy",
                 "count": "[length(parameters('queues'))]",
-                "mode": "Parallel",
+                "mode": "Serial",
                 "batchSize": "[length(parameters('queues'))]"
             }
         },
@@ -179,7 +179,7 @@
             "copy": {
                 "name": "sa_table-copy",
                 "count": "[length(parameters('tables'))]",
-                "mode": "Parallel",
+                "mode": "Serial",
                 "batchSize": "[length(parameters('tables'))]"
             }
         },
@@ -215,7 +215,7 @@
             "copy": {
                 "name": "sa_cotainer-copy",
                 "count": "[length(parameters('containers'))]",
-                "mode": "Parallel",
+                "mode": "Serial",
                 "batchSize": "[length(parameters('containers'))]"
             }
         }
