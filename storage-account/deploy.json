@@ -12,28 +12,28 @@
         },
         "queues": {
             "type": "array",
-            "defaultValue":  [ { "name": "mt" } ],
+            "defaultValue":  [ { "name": "`" } ],
             "metadata": {
                 "description": "The name of the Storage Account queue."
             }
         },
         "tables": {
             "type": "array",
-            "defaultValue": [ { "name": "mt" } ],
+            "defaultValue": [ { "name": "`" } ],
             "metadata": {
                 "description": "The name of the Storage Account table."
             }
         },
         "containers": {
             "type": "array",
-            "defaultValue": [ { "name": "mt" } ],
+            "defaultValue": [ { "name": "`" } ],
             "metadata": {
                 "description": "The name of the Storage Account container."
             }
         },
         "shares": {
             "type": "array",
-            "defaultValue": [ { "name": "mt" } ],
+            "defaultValue": [ { "name": "`" } ],
             "metadata": {
                 "description": "The name of the Storage Account File Share."
             }
@@ -100,7 +100,7 @@
             "tags": "[parameters('tags')]"
         },
         {
-            "condition": "[not(equals(parameters('shares')[copyIndex()].name, 'mt'))]",
+            "condition": "[not(equals(parameters('shares')[copyIndex()].name, '`'))]",
             "name": "[concat(variables('storageAccountName'), '/default/', parameters('shares')[copyIndex()].name)]",
             "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
             "apiVersion": "2019-06-01",
@@ -131,7 +131,7 @@
             }
         },
         {
-            "condition": "[not(equals(parameters('queues')[copyIndex()].name, 'mt'))]",
+            "condition": "[not(equals(parameters('queues')[copyIndex()].name, '`'))]",
             "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
             "apiVersion": "2019-06-01",
             "name": "[concat(variables('storageAccountName'), '/default/', parameters('queues')[copyIndex()].name)]",
@@ -163,7 +163,7 @@
             }
         },
         {
-            "condition": "[not(equals(parameters('tables')[copyIndex()].name, 'mt'))]",
+            "condition": "[not(equals(parameters('tables')[copyIndex()].name, '`'))]",
             "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
             "apiVersion": "2019-06-01",
             "name": "[concat(variables('storageAccountName'), '/default/', parameters('tables')[copyIndex()].name)]",
@@ -197,7 +197,7 @@
             }
         },
         {
-            "condition": "[not(equals(parameters('containers')[copyIndex()].name, 'mt'))]",
+            "condition": "[not(equals(parameters('containers')[copyIndex()].name, '`'))]",
             "name": "[concat(variables('storageAccountName'), '/default/', parameters('containers')[copyIndex()].name)]",
             "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
             "apiVersion": "2019-06-01",
