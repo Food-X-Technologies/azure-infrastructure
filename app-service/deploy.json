@@ -95,7 +95,7 @@
                 "P3v2": 20,
                 "P3v3": 20
         },
-        "autoscaleEnable": "[not(equals(parameters('sku'), 'F1'))]"
+        "autoscaleEnable": "[and(not(equals(parameters('sku'), 'F1')), not(equals(parameters('sku'), 'Y1')))]"
     },
     "resources": [
         {
