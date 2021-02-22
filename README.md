@@ -14,7 +14,7 @@ npm test
 
 # App Service
 ```
-az deployment group create --template-file ./app-service/deploy.json -g ResourceGroup
+az deployment group create --template-file ./app-service/deploy.json --parameters ./app-service/params.json -g ResourceGroup
 ```
 
 # Storage Account
