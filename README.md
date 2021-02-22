@@ -12,12 +12,13 @@ npm install
 npm test
 ```
 
-# App Service
+## Services
+### App Service
 ```
 az deployment group create --template-file ./app-service/deploy.json --parameters ./app-service/params.json -g ResourceGroup
 ```
 
-# Storage Account
+### Storage Account
 ```
 az deployment group create --template-file ./storage-account/deploy.json --parameters ./storage-account/params.json -g ResourceGroup
 ```
