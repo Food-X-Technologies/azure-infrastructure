@@ -2,12 +2,12 @@
 Robust production ready hardend templates, for real-world scenarios
 
 ## Testing
-Install packages from NPM
+### Install packages from NPM
 ```
 npm install
 ```
 
-Run test suite via:
+### Run tests
 ```
 npm test
 ```
