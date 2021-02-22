@@ -19,5 +19,5 @@ az deployment group create --template-file ./app-service/deploy.json -g Resource
 
 # Storage Account
 ```
-az deployment group create --template-file ./storage-account/deploy.json --parameters ./storage-account/test.params.json -g ResourceGroup
+az deployment group create --template-file ./storage-account/deploy.json --parameters ./storage-account/params.json -g ResourceGroup
 ```
