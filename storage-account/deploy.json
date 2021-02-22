@@ -144,7 +144,7 @@
                 "metadata": {}
             },
             "copy": {
-                "name": "sa_queue-copy",
+                "name": "queue-copy",
                 "count": "[length(parameters('queues'))]",
                 "mode": "Serial",
                 "batchSize": "[length(parameters('queues'))]"
@@ -177,7 +177,7 @@
                 "metadata": {}
             },
             "copy": {
-                "name": "sa_table-copy",
+                "name": "table-copy",
                 "count": "[length(parameters('tables'))]",
                 "mode": "Serial",
                 "batchSize": "[length(parameters('tables'))]"
@@ -213,7 +213,7 @@
                 "[concat('Microsoft.Storage/storageAccounts/', variables('name'))]"
             ],
             "copy": {
-                "name": "sa_cotainer-copy",
+                "name": "cotainer-copy",
                 "count": "[length(parameters('containers'))]",
                 "mode": "Serial",
                 "batchSize": "[length(parameters('containers'))]"

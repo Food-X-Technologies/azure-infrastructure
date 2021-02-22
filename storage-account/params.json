@@ -6,7 +6,9 @@
             "value": "osstestunknown"
         },
         "tags":{
-            "value": ["test", "demo", "oss"]
+            "value": {
+                "test": "oss"
+            }
         }
     }
 }
