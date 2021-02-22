@@ -66,7 +66,11 @@
     "variables": {
         "location": "[resourceGroup().location]",
         "sku": "[parameters('sku')]",
-        "name": "[parameters('name')]"
+        "name": "[parameters('name')]",
+        "hasQueues": "[greater(length(parameters('queues')), 0)]",
+        "hasTables": "[greater(length(parameters('tables')), 0)]",
+        "hasShares": "[greater(length(parameters('shares')), 0)]",
+        "hasContainers": "[greater(length(parameters('containers')), 0)]"
     },
     "resources": [
         {
@@ -100,8 +104,8 @@
             "tags": "[parameters('tags')]"
         },
         {
-            "condition": "[greater(length(parameters('shares')), 0)]",
-            "name": "[concat(variables('name'), '/default/', parameters('shares')[copyIndex()])]",
+            "condition": "[variables('hasShares')]",
+            "name": "[concat(variables('name'), '/default/', if(variables('hasShares'), parameters('shares')[copyIndex()], 'none'))]",
             "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
             "apiVersion": "2019-06-01",
             "properties": {
@@ -118,7 +122,7 @@
             }
         },
         {
-            "condition": "[greater(length(parameters('queues')), 0)]",
+            "condition": "[variables('hasQueues')]",
             "name": "[concat(variables('name'), '/default')]",
             "type": "Microsoft.Storage/storageAccounts/queueServices",
             "apiVersion": "2019-06-01",
@@ -132,10 +136,10 @@
             }
         },
         {
-            "condition": "[greater(length(parameters('queues')), 0)]",
+            "condition": "[variables('hasQueues')]",
             "type": "Microsoft.Storage/storageAccounts/queueServices/queues",
             "apiVersion": "2019-06-01",
-            "name": "[concat(variables('name'), '/default/', parameters('queues')[copyIndex()])]",
+            "name": "[concat(variables('name'), '/default/', if(variables('hasQueues'), parameters('queues')[copyIndex()], 'none'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts/queueServices', variables('name'), 'default')]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('name'))]"
@@ -151,7 +155,7 @@
             }
         },
         {
-            "condition": "[greater(length(parameters('tables')), 0)]",
+            "condition": "[variables('hasTables')]",
             "name": "[concat(variables('name'), '/default')]",
             "type": "Microsoft.Storage/storageAccounts/tableServices",
             "apiVersion": "2019-06-01",
@@ -165,10 +169,10 @@
             }
         },
         {
-            "condition": "[greater(length(parameters('tables')), 0)]",
+            "condition": "[variables('hasTables')]",
             "type": "Microsoft.Storage/storageAccounts/tableServices/tables",
             "apiVersion": "2019-06-01",
-            "name": "[concat(variables('name'), '/default/', parameters('tables')[copyIndex()])]",
+            "name": "[concat(variables('name'), '/default/', if(variables('hasTables'), parameters('tables')[copyIndex()], 'none'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts/tableServices', variables('name'), 'default')]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('name'))]"
@@ -184,7 +188,7 @@
             }
         },
         {
-            "condition": "[greater(length(parameters('containers')), 0)]",
+            "condition": "[variables('hasContainers')]",
             "name": "[concat(variables('name'), '/default')]",
             "type": "Microsoft.Storage/storageAccounts/blobServices",
             "apiVersion": "2019-06-01",
@@ -200,8 +204,8 @@
             }
         },
         {
-            "condition": "[greater(length(parameters('containers')), 0)]",
-            "name": "[concat(variables('name'), '/default/', parameters('containers')[copyIndex()])]",
+            "condition": "[variables('hasContainers')]",
+            "name": "[concat(variables('name'), '/default/', if(variables('hasContainers'), parameters('containers')[copyIndex()], 'none'))]",
             "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
             "apiVersion": "2019-06-01",
             "properties": {
