@@ -55,7 +55,7 @@
         },
         "tags": {
             "type": "object",
-            "defaultValue": { },
+            "defaultValue": {},
             "metadata": {
                 "description": "Tags for service"
             }
@@ -63,6 +63,8 @@
     },
     "variables": {
         "location": "[resourceGroup().location]",
+        "ossVersion": { "ossversion": "0.0.1" },
+        "tags": "[union(parameters('tags'), variables('ossVersion'))]",
         "hostingPlanName": "[parameters('hostingPlanName')]",
         "sku": "[parameters('sku')]",
         "workerSize": "[parameters('size')]",
@@ -88,7 +90,7 @@
                 "workerSize": "[variables('workerSize')]",
                 "reserved": "[variables('reserved')]"
             },
-            "tags": "[parameters('tags')]"
+            "tags": "[variables('tags')]"
         },
         {
             "condition": "[variables('autoscaleEnable')]",
@@ -155,6 +157,7 @@
                 "name": "scale-out",
                 "targetResourceUri": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]"
             },
+            "tags": "[variables('tags')]",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]"
             ]
