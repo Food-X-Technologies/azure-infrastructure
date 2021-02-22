@@ -5,7 +5,12 @@
         "name": {
             "value": "osstestunknown"
         },
-        "tags":{
+        "queues": {
+            "value": [
+                "test"
+            ]
+        },
+        "tags": {
             "value": {
                 "test": "oss"
             }

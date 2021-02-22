@@ -67,6 +67,8 @@
         "location": "[resourceGroup().location]",
         "sku": "[parameters('sku')]",
         "name": "[parameters('name')]",
+        "ossVersion": { "ossversion": "0.0.1" },
+        "tags": "[union(parameters('tags'), variables('ossVersion'))]",
         "hasQueues": "[greater(length(parameters('queues')), 0)]",
         "hasTables": "[greater(length(parameters('tables')), 0)]",
         "hasShares": "[greater(length(parameters('shares')), 0)]",
@@ -101,7 +103,7 @@
                     "keySource": "Microsoft.Storage"
                 }
             },
-            "tags": "[parameters('tags')]"
+            "tags": "[variables('tags')]"
         },
         {
             "condition": "[variables('hasShares')]",
@@ -114,6 +116,7 @@
                     "days": 365
                 }
             },
+            "tags": "[variables('tags')]",
             "copy": {
                 "name": "shares-copy",
                 "count": "[length(parameters('shares'))]",
@@ -133,7 +136,8 @@
                 "cors": {
                     "corsRules": []
                 }
-            }
+            },
+            "tags": "[variables('tags')]"
         },
         {
             "condition": "[variables('hasQueues')]",
@@ -147,6 +151,7 @@
             "properties": {
                 "metadata": {}
             },
+            "tags": "[variables('tags')]",
             "copy": {
                 "name": "queue-copy",
                 "count": "[length(parameters('queues'))]",
@@ -166,7 +171,8 @@
                 "cors": {
                     "corsRules": []
                 }
-            }
+            },
+            "tags": "[variables('tags')]"
         },
         {
             "condition": "[variables('hasTables')]",
@@ -180,6 +186,7 @@
             "properties": {
                 "metadata": {}
             },
+            "tags": "[variables('tags')]",
             "copy": {
                 "name": "table-copy",
                 "count": "[length(parameters('tables'))]",
@@ -201,7 +208,8 @@
                 },
                 "isVersioningEnabled": false,
                 "automaticSnapshotPolicyEnabled": false
-            }
+            },
+            "tags": "[variables('tags')]"
         },
         {
             "condition": "[variables('hasContainers')]",
@@ -216,6 +224,7 @@
                 "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('name'), 'default')]",
                 "[concat('Microsoft.Storage/storageAccounts/', variables('name'))]"
             ],
+            "tags": "[variables('tags')]",
             "copy": {
                 "name": "cotainer-copy",
                 "count": "[length(parameters('containers'))]",
