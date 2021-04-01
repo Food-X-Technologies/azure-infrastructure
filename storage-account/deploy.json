@@ -132,11 +132,6 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('name'))]"
             ],
-            "properties": {
-                "cors": {
-                    "corsRules": []
-                }
-            },
             "tags": "[variables('tags')]"
         },
         {
@@ -198,27 +193,27 @@
             "condition": "[variables('hasContainers')]",
             "name": "[concat(variables('name'), '/default')]",
             "type": "Microsoft.Storage/storageAccounts/blobServices",
-            "apiVersion": "2019-06-01",
+            "apiVersion": "2021-01-01",
+            "properties": {
+                "isVersioningEnabled": false,
+                "automaticSnapshotPolicyEnabled": false,
+                "deleteRetentionPolicy": {
+                    "enabled": true,
+                    "days": 7
+                }
+            },
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('name'))]"
             ],
-            "properties": {
-                "cors": {
-                    "corsRules": []
-                },
-                "isVersioningEnabled": false,
-                "automaticSnapshotPolicyEnabled": false
-            },
             "tags": "[variables('tags')]"
         },
         {
             "condition": "[variables('hasContainers')]",
             "name": "[concat(variables('name'), '/default/', if(variables('hasContainers'), parameters('containers')[copyIndex()], 'none'))]",
             "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-            "apiVersion": "2019-06-01",
+            "apiVersion": "2021-01-01",
             "properties": {
-                "publicAccess": "None",
-                "metadata": {}
+                "publicAccess": "None"
             },
             "dependsOn": [
                 "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('name'), 'default')]",
