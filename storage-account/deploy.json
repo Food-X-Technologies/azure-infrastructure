@@ -31,6 +31,20 @@
                 "description": "The name of the Storage Account container."
             }
         },
+        "containerstodeleteblobs": {
+            "type": "array",
+            "defaultValue": [],
+            "metadata": {
+                "description": "Containers name which we want to delete it's Blobs after a day."
+            }
+        },
+        "deleteblobafterdays": {
+            "type": "int",
+            "defaultValue": 7,
+            "metadata": {
+                "description": "delete the blob after this value by day."
+            }
+        },
         "shares": {
             "type": "array",
             "defaultValue": [],
@@ -72,7 +86,8 @@
         "hasQueues": "[greater(length(parameters('queues')), 0)]",
         "hasTables": "[greater(length(parameters('tables')), 0)]",
         "hasShares": "[greater(length(parameters('shares')), 0)]",
-        "hasContainers": "[greater(length(parameters('containers')), 0)]"
+        "hasContainers": "[greater(length(parameters('containers')), 0)]",
+        "hascontainerstodeleteblobs": "[greater(length(parameters('containerstodeleteblobs')), 0)]"
     },
     "resources": [
         {
@@ -104,6 +119,43 @@
                 }
             },
             "tags": "[variables('tags')]"
+        },
+        {
+            "condition": "[variables('hascontainerstodeleteblobs')]",
+            "name": "[concat(variables('name'), '/default')]",
+            "type": "Microsoft.Storage/storageAccounts/managementPolicies",
+            "apiVersion": "2019-04-01",
+            "dependsOn": [
+              "[variables('name')]"
+            ],
+            "properties": {
+                "policy": {
+                    "rules": [
+                        {
+                            "name": "[concat(variables('name'),'-RemoveContainerBlobsWithPrefixAfter',parameters('deleteblobafterdays'),'Days')]",
+                            "enabled": true,
+                            "type": "Lifecycle",
+                            "definition": {
+                              "filters": {
+                                "blobTypes": [ "blockBlob" ],
+                                "prefixMatch": [ "[parameters('containerstodeleteblobs')[copyIndex()]]" ]
+                              },
+                              "actions": {
+                                "baseBlob": {
+                                  "delete": { "daysAfterModificationGreaterThan": "[parameters('deleteblobafterdays')]"}
+                                }
+                              }
+                            }
+                          }
+                    ]
+                }
+              },
+              "copy": {
+                  "name": "rule-copy",
+                  "count": "[length(parameters('containerstodeleteblobs'))]",
+                  "mode": "Serial",
+                  "batchSize": "[length(parameters('containerstodeleteblobs'))]"
+              }
         },
         {
             "condition": "[variables('hasShares')]",
