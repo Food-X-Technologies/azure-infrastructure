@@ -35,7 +35,7 @@
             "type": "array",
             "defaultValue": [],
             "metadata": {
-                "description": "Containers name which we want to delete it's Blobs after a day."
+                "description": "Containers name which we want to delete it's Blobs after some days."
             }
         },
         "deleteblobafterdays": {
@@ -138,7 +138,7 @@
                             "definition": {
                               "filters": {
                                 "blobTypes": [ "blockBlob" ],
-                                "prefixMatch": [ "[parameters('containerstodeleteblobs')[copyIndex()]]" ]
+                                "prefixMatch": "[parameters('containerstodeleteblobs')]"
                               },
                               "actions": {
                                 "baseBlob": {
@@ -149,12 +149,6 @@
                           }
                     ]
                 }
-              },
-              "copy": {
-                  "name": "rule-copy",
-                  "count": "[length(parameters('containerstodeleteblobs'))]",
-                  "mode": "Serial",
-                  "batchSize": "[length(parameters('containerstodeleteblobs'))]"
               }
         },
         {
